@@ -10,8 +10,8 @@ from hello_job.model.position_model import PositionModel
 db = PositionModel()
 
 
-def get_position(connfd,position, salary, enterprise):
-    result = db.get_position(position,salary,enterprise)
+def get_position(connfd, position, salary, enterprise):
+    result = db.get_position(position, salary, enterprise)
     if not result:
         connfd.send(b'FAIL')
         return
