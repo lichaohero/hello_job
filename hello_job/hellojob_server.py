@@ -10,11 +10,12 @@ from socket import *
 from threading import Thread
 
 # 全局变量
+from hello_job.controller import Controller
 from hello_job.sendmail import MailCode
 
 HOST = '0.0.0.0'
 PORT = 8402
-ADDR = (HOST,PORT)
+ADDR = (HOST, PORT)
 
 
 # 文件处理功能
@@ -23,44 +24,34 @@ def applicant_flow():
 
 
 class FTPServer(Thread):
-    def __init__(self,connfd):
+    def __init__(self, connfd):
         super().__init__()
         self.connfd = connfd
         self.random_code = "123456"
 
+        self.controller = Controller(self.connfd)
 
-    def verify_code(self):
-        str_code = ""
-        for i in range(6):
-            str_code += str(random.randint(0,9))
-        return str_code
+    # def verify_code(self):
+    #     str_code = ""
+    #     for i in range(6):
+    #         str_code += str(random.randint(0, 9))
+    #     return str_code
+
+    def login_applicant(self, data):
+        print(data)
+        self.connfd.send(b"Hello")
 
     # 处理客户端请求
     def run(self):
         # 循环接受请求
         while True:
             data = self.connfd.recv(1024).decode()
-            print("Request:",data)
-            client_request = data.split(",")
+            print("Request:", data)
+            client_request = data.split(",", 1)
             print(client_request)
             if not data:
                 return
-            if client_request[0] == "login verification":
-                #Mysql查询账号密码的正确性   张志强
-                self.connfd.send(b"Hello")
-            elif client_request[0] == "mail_register_code":
-                self.random_code = self.verify_code()
-                print(self.random_code)
-                MailCode(client_request[1],self.random_code).mail_task()
-            elif client_request[0] == "submit_register":
-                if self.random_code == client_request[3]:
-                    #Mysql储存client_request账号(邮箱地址)  孙国建
-                    self.connfd.send("register_success".encode())
-                else:
-                    self.connfd.send("验证码错误".encode())
-            elif client_request[0] == "search_position":
-                get_position(client_request)
-
+            self.client_request[0](client_request[1])
 
 # 网络功能
 def main():
@@ -87,6 +78,7 @@ def main():
         t = FTPServer(c)
         t.setDaemon(True)
         t.start()
+
 
 if __name__ == '__main__':
     main()

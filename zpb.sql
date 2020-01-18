@@ -1,3 +1,4 @@
+create database recruit charset ='utf8';
 --公司表
 create table enterprise
 (   id                 int primary key auto_increment,
@@ -11,8 +12,9 @@ create table hr
 (   id              int primary key auto_increment,
     name            varchar(30),
     enterprise_id   int,
-    hr_passwodr     varchar (20),
-    hr_account      varchar (20),
+    hr_password     varchar(20),
+    hr_account      varchar(20),
+    mail_addr       varchar(128),
     login_time      datetime,
     logout_time     datetime
 );
@@ -21,9 +23,9 @@ create table hr
 create table position
 (   id              int primary key auto_increment,
     name            varchar(30),
-    month_pay       decimal ,
-    content         text    ,
-    hr_id           int     ,
+    month_pay       decimal(8,2),
+    content         text,
+    hr_id           int,
     enterprise_id   int
 );
 
@@ -33,8 +35,8 @@ create table applicant
     name            varchar(30),
     mail_addr       varchar(30),
     password        varchar(20),
-    accpunt         varchar(20),
-    login_time      datetime ,
+    account         varchar(20),
+    login_time      datetime,
     logout_time     datetime
 );
 
@@ -52,7 +54,7 @@ create table chat_record
     char_id         int,
     hr_id           int,
     applicant_id    int,
-    type            enum('hr','applicant    '),
+    type            enum('hr','applicant'),
     content         text
 );
 
