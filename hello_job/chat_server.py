@@ -4,12 +4,10 @@ env: python3.6
 多线程并发，socket
 """
 
+import random
+import sys
 from socket import *
 from threading import Thread
-import sys
-import os
-from time import sleep
-import random
 
 # 全局变量
 from hello_job.sendmail import MailCode

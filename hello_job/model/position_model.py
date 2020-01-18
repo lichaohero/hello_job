@@ -24,3 +24,5 @@ class PositionModel:
             sql += "and salary = '%s'" % salary
         if not enterprise:
             sql += "and enterprise='%s'" % enterprise
+        self.cur.execute(sql)
+        return self.cur.fetchall()

@@ -63,6 +63,8 @@ class LoginPage(object):
         if not user_pwd:
             Label(self.window, text='密码不能为空', font=("黑体", 15)).place(x=550, y=300)
         hj_sock.send(b"login verification,%s,%s" % (user_name.encode(), user_pwd.encode()))
+
+
         data = hj_sock.recv(128).decode()
         if data == "账号不存在":
             Label(self.window, text='账号不存在', font=("黑体", 15)).place(x=550, y=250)
