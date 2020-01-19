@@ -9,6 +9,7 @@ from threading import Thread
 import sys
 import os
 from time import sleep
+import json
 
 from sendmail import MailCode
 import random
@@ -54,22 +55,22 @@ class HelloJobServer(Thread):
         while True:
             data = self.connfd.recv(1024).decode()
             print("Request:", data)
-            client_request = data.split(",")
+            client_request = json.loads(data)
             print(client_request)
             if not data:
                 return
-            if client_request[0] == "login verification":
+            if client_request["request_type"] == "login verification":
                 self.login_verification()
-            if client_request[0] == "mail_register_code":
+            elif client_request["request_type"] == "mail_register_code":
                 self.random_code = self.verify_code()
                 print(self.random_code)
-                if MailCode(client_request[1], self.random_code).mail_task():
+                if MailCode(client_request["data"]["mailaddr"], self.random_code).mail_task():
                     self.connfd.send(b"mailaddr ok")
                 else:
                     self.connfd.send(b"mailaddr error")
-            if client_request[0] == "submit register":
+            elif client_request["request_type"] == "submit register":
                 print(self.random_code)
-                if self.random_code == client_request[3]:
+                if self.random_code == client_request["data"]["verify_code"]:
                     print("注册成功")
                     # Mysql储存client_request账号(邮箱地址)  孙国建
                     self.connfd.send("register success".encode())

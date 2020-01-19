@@ -12,6 +12,9 @@ root = Tk()
 root.title('Hello Job')
 
 
+
+
+# 首页，调用的子类
 class HomePage:
     def __init__(self, master):
         self.window = master
@@ -65,8 +68,10 @@ class PersonalLogin:
         self.window.title('Hello Job')
         self.width = 800
         self.height = 600
+        self.imagefile = PhotoImage(file=r'backimg.PNG')
         self.var_usr_name = StringVar()
         self.var_usr_pwd = StringVar()
+        self.background_img()
         self.window_postion()
         self.controls_layout()
 
@@ -86,6 +91,11 @@ class PersonalLogin:
         self.window.geometry(alignstr)
         self.window.resizable(width=False, height=False)
 
+    def background_img(self):
+        canvas = Canvas(self.window, height=1000, width=800)
+        image = canvas.create_image(0, 0, anchor='nw', image=self.imagefile)
+        canvas.pack(side='top')
+
     def user_login(self):
         user_name = self.var_usr_name.get()
         user_pwd = self.var_usr_pwd.get()
@@ -93,22 +103,27 @@ class PersonalLogin:
             tkinter.messagebox.showinfo(title='Hello Job', message='账号不能为空')
         elif not user_pwd:
             tkinter.messagebox.showinfo(title='Hello Job', message='密码不能为空')
-        hj_sock.send(b"p_login verification,%s,%s" % (user_name.encode(), user_pwd.encode()))
-        self.check_login()
+        hj_sock.send(b"login verification,%s,%s" % (user_name.encode(), user_pwd.encode()))
 
     def check_login(self):
-        data = hj_sock.recv(1024).decode()
+        data = hj_sock.recv(128).decode()
         if data == "user not exist":
             tkinter.messagebox.showinfo(title='Hello Job', message='账号不存在')
-        elif data == "password error":
+        if data == "password error":
             tkinter.messagebox.showinfo(title='Hello Job', message='密码错误')
-        elif data == "allow p_login":
-            login_account =self.var_usr_name.get()
+        if data == "个人登录":
+            account = self.var_usr_name.get()
             self.window.destroy()
             global pview_tk
             pview_tk = Tk()
-            PersonalView(pview_tk,login_account)
+            PersonalView(pview_tk,account)
             pview_tk.mainloop()
+        if data == "企业登录":
+            self.window.destroy()
+            global eview_tk1
+            eview_tk1 = Tk()
+            EnterpriselView(eview_tk1)
+            eview_tk1.mainloop()
 
     def user_register(self):
         PersonalRegister(self.window)
@@ -124,8 +139,10 @@ class EnterpriseLogin:
         self.window.title('Hello Job')
         self.width = 800
         self.height = 600
+        self.imagefile = PhotoImage(file=r'e_login_bk.png')
         self.var_usr_name = StringVar()
         self.var_usr_pwd = StringVar()
+        self.background_img()
         self.window_postion()
         self.controls_layout()
 
@@ -145,6 +162,11 @@ class EnterpriseLogin:
         self.window.geometry(alignstr)
         self.window.resizable(width=False, height=False)
 
+    def background_img(self):
+        canvas = Canvas(self.window, height=1000, width=800)
+        image = canvas.create_image(0, 0, anchor='nw', image=self.imagefile)
+        canvas.pack(side='top')
+
     def user_login(self):
         user_name = self.var_usr_name.get()
         user_pwd = self.var_usr_pwd.get()
@@ -152,20 +174,16 @@ class EnterpriseLogin:
             tkinter.messagebox.showinfo(title='Hello Job', message='账号不能为空')
         elif not user_pwd:
             tkinter.messagebox.showinfo(title='Hello Job', message='密码不能为空')
-        hj_sock.send(b"e_login verification,%s,%s" % (user_name.encode(), user_pwd.encode()))
-
-    def check_login(self):
+        hj_sock.send(b"login verification,%s,%s" % (user_name.encode(), user_pwd.encode()))
         data = hj_sock.recv(128).decode()
         if data == "user not exist":
             tkinter.messagebox.showinfo(title='Hello Job', message='账号不存在')
-        elif data == "password error":
+        if data == "password error":
             tkinter.messagebox.showinfo(title='Hello Job', message='密码错误')
-        elif data == "allow e_login":
-            self.window.destroy()
-            global eview_tk
-            eview_tk = Tk()
-            EnterpriselView(eview_tk)
-            eview_tk.mainloop()
+        if data == "个人登录":
+            pass
+        if data == "企业登录":
+            pass
 
     def user_register(self):
         PersonalRegister(self.window)
@@ -179,7 +197,7 @@ class PersonalRegister:
     def __init__(self, master):
         self.window = Toplevel(master)
         self.window.title('Register Account')
-        self.width = 1000
+        self.width = 800
         self.height = 600
         self.new_user = StringVar()
         self.new_pwd = StringVar()
@@ -196,11 +214,11 @@ class PersonalRegister:
         Label(self.window, text='输入密码:', font=("黑体", 15)).place(x=250, y=250)
         Label(self.window, text='确认密码:', font=("黑体", 15)).place(x=250, y=300)
         Label(self.window, text='验证码:', font=("黑体", 15)).place(x=250, y=350)
-        Entry(self.window, textvariable=self.new_user, font=("黑体", 15)).place(x=350, y=200)
-        Entry(self.window, textvariable=self.new_pwd, show='*', font=("黑体", 15)).place(x=350, y=250)
-        Entry(self.window, textvariable=self.confirm_pwd, show='*', font=("黑体", 15)).place(x=350, y=300)
-        Entry(self.window, textvariable=self.verify_code, font=("黑体", 15)).place(x=350, y=350)
-        Button(self.window, text="获取验证码", command=self.check_code, font=("黑体", 15)).place(x=570, y=350)
+        Entry(self.window, textvariable=self.new_user, font=("黑体", 15)).place(x=330, y=200)
+        Entry(self.window, textvariable=self.new_pwd, show='*', font=("黑体", 15)).place(x=330, y=250)
+        Entry(self.window, textvariable=self.confirm_pwd, show='*', font=("黑体", 15)).place(x=330, y=300)
+        Entry(self.window, textvariable=self.verify_code, font=("黑体", 15)).place(x=330, y=350)
+        Button(self.window, text="获取验证码", command=self.get_code, font=("黑体", 15)).place(x=550, y=350)
         Button(self.window, text="确认", command=self.submit_regist, font=("黑体", 15)).place(x=350, y=450)
         Button(self.window, text="退出", command=self.user_quit, font=("黑体", 15)).place(x=450, y=450)
 
@@ -209,9 +227,10 @@ class PersonalRegister:
             self.width, self.height, (self.window.winfo_screenwidth() - self.width) / 2,
             (self.window.winfo_screenheight() - self.height) / 2)
         self.window.geometry(alignstr)
+        # 设置窗口是否可变长、宽，True：可变，False：不可变
         self.window.resizable(width=False, height=False)
 
-    def check_code(self):
+    def get_code(self):
         new_user = self.new_user.get()
         hj_sock.send(b"mail_register_code,%s" % (new_user.encode()))
         data = hj_sock.recv(1024).decode()
@@ -225,11 +244,11 @@ class PersonalRegister:
         new_pwd = self.new_pwd.get()
         confirm_pwd = self.confirm_pwd.get()
         verify_code = self.verify_code.get()
-        if self.check_pwd(new_pwd, confirm_pwd):
-            hj_sock.send(b"submit register,%s,%s" % (new_user.encode(), new_pwd.encode()))
-            self.check_regist()
+        if self.judge_pwd(new_pwd, confirm_pwd):
+            hj_sock.send(b"submit register,%s,%s,%s" % (new_user.encode(), new_pwd.encode(), verify_code.encode()))
+            self.judge_regist()
 
-    def check_pwd(self, new_pwd, confirm_pwd):
+    def judge_pwd(self, new_pwd, confirm_pwd):
         if not new_pwd or not confirm_pwd:
             tkinter.messagebox.showinfo(title='Hello Job', message='密码不能为空')
             return False
@@ -242,7 +261,7 @@ class PersonalRegister:
         else:
             return True
 
-    def check_regist(self):
+    def judge_regist(self):
         data = hj_sock.recv(1024).decode()
         if data == "name exists":
             tkinter.messagebox.showinfo(title='Hello Job', message='账号已被注册')
@@ -259,35 +278,14 @@ class PersonalRegister:
 class PersonalView:
     def __init__(self, master,account):
         self.window = master
+        self.account =account
         self.window.title('Hello Job')
         self.width = 800
         self.height = 600
-        self.window_postion()
         self.control_layout()
-        self.account = account
 
     def control_layout(self):
-        # 标签 用户名密码
-        # Label(self.window, text='(请填写邮箱地址)', font=("黑体", 15)).place(x=550, y=200)
-        # Label(self.window, text='(密码为8-16位且大小写加数字)', font=("黑体", 15)).place(x=550, y=250)
-        # Label(self.window, text='输入账号:', font=("黑体", 15)).place(x=250, y=200)
-        # Label(self.window, text='输入密码:', font=("黑体", 15)).place(x=250, y=250)
-        # Label(self.window, text='确认密码:', font=("黑体", 15)).place(x=250, y=300)
-        # Label(self.window, text='验证码:', font=("黑体", 15)).place(x=250, y=350)
-        # Entry(self.window, textvariable=self.new_user, font=("黑体", 15)).place(x=350, y=200)
-        # Entry(self.window, textvariable=self.new_pwd, show='*', font=("黑体", 15)).place(x=350, y=250)
-        # Entry(self.window, textvariable=self.confirm_pwd, show='*', font=("黑体", 15)).place(x=350, y=300)
-        # Entry(self.window, textvariable=self.verify_code, font=("黑体", 15)).place(x=350, y=350)
-        # Button(self.window, text="获取验证码", command=self.check_code, font=("黑体", 15)).place(x=570, y=350)
-        # Button(self.window, text="确认", command=self.submit_regist, font=("黑体", 15)).place(x=350, y=450)
-        # Button(self.window, text="退出", command=self.user_quit, font=("黑体", 15)).place(x=450, y=450)
         pass
-    def window_postion(self):
-        alignstr = '%dx%d+%d+%d' % (
-            self.width, self.height, (self.window.winfo_screenwidth() - self.width) / 2,
-            (self.window.winfo_screenheight() - self.height) / 2)
-        self.window.geometry(alignstr)
-        self.window.resizable(width=False, height=False)
 
 
 class EnterpriselView:
@@ -296,9 +294,10 @@ class EnterpriselView:
         self.window.title('Hello Job')
         self.width = 800
         self.height = 600
+        self.imagefile = PhotoImage(file=r'backimg.PNG')
         self.var_usr_name = StringVar()
         self.var_usr_pwd = StringVar()
 
 
-PersonalView(root,"asd")
+HomePage(root)
 root.mainloop()
