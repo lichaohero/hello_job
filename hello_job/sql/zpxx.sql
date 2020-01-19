@@ -26,15 +26,15 @@ values
 ('测试员',6000,'好好工作,天天向上',1,1);
 
 
-insert into `applicant` (name,mail_addr,password,account,login_time,logout_time)
+insert into `applicant` (name,mail_addr,password,account,login_time,logout_time,wanted_position,wanted_salary)
 values
-('张晓','111@163.com','1234561','qzzhangxiao',now(),now()),
-('刘强','222@163.com','234567','qzliuqian',now(),now()),
-('付超','333@qq.com','345678','qzfuchao',now(),now()),
-('尹婷','444@qq.com','456789','qzyinting',now(),now()),
-('何丽','555@qq.com','567891','qzheli',now(),now()),
-('严蓉','666@qq.com','678911','qzyanrong',now(),now()),
-('王俊文','777@163.com','789112','qzwangjunwen',now(),now());
+('张晓','111@163.com','1234561','qzzhangxiao',now(),now(),'测试',5000),
+('刘强','222@163.com','234567','qzliuqian',now(),now(),'程序员',6000),
+('付超','333@qq.com','345678','qzfuchao',now(),now(),'测试',5000),
+('尹婷','444@qq.com','456789','qzyinting',now(),now(),'架构师',5000),
+('何丽','555@qq.com','567891','qzheli',now(),now(),'秘书',5000),
+('严蓉','666@qq.com','678911','qzyanrong',now(),now(),'测试',5000),
+('王俊文','777@163.com','789112','qzwangjunwen',now(),now(),'程序员',5000);
 
 
 insert into `chat_record` (chat_id,hr_id,applicant_id,type,content)

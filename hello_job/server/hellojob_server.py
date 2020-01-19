@@ -4,14 +4,12 @@ env: python3.6
 多线程并发，socket
 """
 
-import random
 import sys
 from socket import *
 from threading import Thread
 
 # 全局变量
-from hello_job.controller import Controller
-from hello_job.sendmail import MailCode
+from hello_job.other.controller import Controller
 
 HOST = '0.0.0.0'
 PORT = 8402

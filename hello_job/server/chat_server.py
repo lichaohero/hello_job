@@ -10,7 +10,7 @@ from socket import *
 from threading import Thread
 
 # 全局变量
-from hello_job.sendmail import MailCode
+from hello_job.client.sendmail import MailCode
 
 HOST = '0.0.0.0'
 PORT = 8402
