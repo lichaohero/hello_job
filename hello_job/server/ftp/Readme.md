@@ -1,2 +1,0 @@
-resume upload
-resume download

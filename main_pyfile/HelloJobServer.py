@@ -4,35 +4,39 @@ env: python3.6
 多线程并发，socket
 """
 
-import random
-import sys
 from socket import *
 from threading import Thread
+import sys
+import os
+from time import sleep
+from sendmail import MailCode
+import random
+import pymysql
+
 
 # 全局变量
-from hello_job.client.sendmail import MailCode
-
 HOST = '0.0.0.0'
 PORT = 8402
-ADDR = (HOST,PORT)
-
+ADDR = (HOST, PORT)
+# mysql
+# db = pymysql.connect(host="localhost",
+#                      port=3306,
+#                      user="root",
+#                      password="kai199418",
+#                      database="school",
+#                      charset="utf8")
 
 # 文件处理功能
-def applicant_flow():
-    pass
-
-
-class FTPServer(Thread):
-    def __init__(self,connfd):
+class HelloJobServer(Thread):
+    def __init__(self, connfd):
         super().__init__()
         self.connfd = connfd
-        self.random_code = "123456"
-
+        self.random_code = ""
 
     def verify_code(self):
         str_code = ""
         for i in range(6):
-            str_code += str(random.randint(0,9))
+            str_code += str(random.randint(0, 9))
         return str_code
 
     # 处理客户端请求
@@ -40,27 +44,31 @@ class FTPServer(Thread):
         # 循环接受请求
         while True:
             data = self.connfd.recv(1024).decode()
-            print("Request:",data)
+            print("Request:", data)
             client_request = data.split(",")
             print(client_request)
             if not data:
                 return
             if client_request[0] == "login verification":
-                #Mysql查询账号密码的正确性   张志强
-                self.connfd.send(b"Hello")
-            elif client_request[0] == "mail_register_code":
+                pass
+            if client_request[0] == "mail_register_code":
                 self.random_code = self.verify_code()
                 print(self.random_code)
-                MailCode(client_request[1],self.random_code).mail_task()
-            elif client_request[0] == "submit_register":
-                if self.random_code == client_request[3]:
-                    #Mysql储存client_request账号(邮箱地址)  孙国建
-                    self.connfd.send("register_success".encode())
+                if MailCode(client_request[1], self.random_code).mail_task():
+                    self.connfd.send(b"mailaddr ok")
                 else:
-                    self.connfd.send("验证码错误".encode())
-            elif client_request[0] == "search_position":
-                get_position(client_request)
+                    self.connfd.send(b"mailaddr error")
+            if client_request[0] == "submit register":
+                print(self.random_code)
+                if self.random_code == client_request[3]:
+                    print("注册成功")
+                    # Mysql储存client_request账号(邮箱地址)  孙国建
+                    self.connfd.send("register success".encode())
+                else:
+                    self.connfd.send("code error".encode())
 
+class HelloJob:
+    pass
 
 # 网络功能
 def main():
@@ -70,7 +78,7 @@ def main():
     s.bind(ADDR)
     s.listen(3)
 
-    print('Listen the port 8888...')
+    print('Listen the port 8042...')
     # 循环等待客户端连接
     while True:
         try:
@@ -84,9 +92,10 @@ def main():
             continue
 
         # 客户端连接 ，创建线程
-        t = FTPServer(c)
+        t = HelloJobServer(c)
         t.setDaemon(True)
         t.start()
+
 
 if __name__ == '__main__':
     main()
