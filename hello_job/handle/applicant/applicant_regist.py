@@ -10,6 +10,7 @@ umd = UserModel()
 def Verify_user_login_information(connfd, name, passwd):
     """
     验证登录账号密码正确性，发送对应字节码
+    :Author: ZhiQiang
     :param name: 用户姓名
     :param passwd: 用户密码
     :return: None

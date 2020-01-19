@@ -43,7 +43,8 @@ class FTPServer(Thread):
                 return
             if client_request[0] == "login verification":
                 # Mysql查询账号密码的正确性   张志强
-                Verify_user_login_information(self.connfd, client_request[1], client_request[2])  # 验证方法
+                # 验证方法 Author: ZhiQiang
+                Verify_user_login_information(self.connfd, client_request[1], client_request[2])
             if client_request[0] == "mail_register_code":
                 self.random_code = self.verify_code()
                 print(self.random_code)

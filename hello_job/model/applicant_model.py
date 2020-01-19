@@ -48,6 +48,7 @@ class UserModel:
     def User_information_judgment(self, name, passwd):
         """
         判断用户信息是否正确，返回对应字符串辅以判断
+        :Author: ZhiQiang
         :param name: 用户名
         :param passwd: 密码
         :return: 对应判断字符串
