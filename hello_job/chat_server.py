@@ -8,27 +8,27 @@ import random
 import sys
 from socket import *
 from threading import Thread
+from hello_job.handle.applicant.applicant_regist import Verify_user_login_information
 
 # 全局变量
 from hello_job.sendmail import MailCode
 
 HOST = '0.0.0.0'
 PORT = 8402
-ADDR = (HOST,PORT)
+ADDR = (HOST, PORT)
 
 
 # 文件处理功能
 class FTPServer(Thread):
-    def __init__(self,connfd):
+    def __init__(self, connfd):
         super().__init__()
         self.connfd = connfd
         self.random_code = "123456"
 
-
     def verify_code(self):
         str_code = ""
         for i in range(6):
-            str_code += str(random.randint(0,9))
+            str_code += str(random.randint(0, 9))
         return str_code
 
     # 处理客户端请求
@@ -36,21 +36,21 @@ class FTPServer(Thread):
         # 循环接受请求
         while True:
             data = self.connfd.recv(1024).decode()
-            print("Request:",data)
+            print("Request:", data)
             client_request = data.split(",")
             print(client_request)
             if not data:
                 return
             if client_request[0] == "login verification":
-                #Mysql查询账号密码的正确性   张志强
-                self.connfd.send(b"Hello")
+                # Mysql查询账号密码的正确性   张志强
+                Verify_user_login_information(self.connfd, client_request[1], client_request[2])  # 验证方法
             if client_request[0] == "mail_register_code":
                 self.random_code = self.verify_code()
                 print(self.random_code)
-                MailCode(client_request[1],self.random_code).mail_task()
+                MailCode(client_request[1], self.random_code).mail_task()
             if client_request[0] == "submit_register":
                 if self.random_code == client_request[3]:
-                    #Mysql储存client_request账号(邮箱地址)  孙国建
+                    # Mysql储存client_request账号(邮箱地址)  孙国建
                     self.connfd.send("register_success".encode())
 
                 else:
@@ -82,6 +82,7 @@ def main():
         t = FTPServer(c)
         t.setDaemon(True)
         t.start()
+
 
 if __name__ == '__main__':
     main()
