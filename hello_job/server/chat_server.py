@@ -3,7 +3,7 @@ ftp 文件服务器，服务端
 env: python3.6
 多线程并发，socket
 """
-
+import json
 import random
 import sys
 from socket import *
@@ -11,10 +11,12 @@ from threading import Thread
 
 # 全局变量
 from hello_job.client.sendmail import MailCode
+from hello_job.server.handle.applicant.applicant_regist import verify_user_login_information
+from hello_job.server.handle.applicant.search_position import get_position
 
 HOST = '0.0.0.0'
 PORT = 8402
-ADDR = (HOST,PORT)
+ADDR = (HOST, PORT)
 
 
 # 文件处理功能
@@ -22,44 +24,58 @@ def applicant_flow():
     pass
 
 
-class FTPServer(Thread):
-    def __init__(self,connfd):
+# 文件处理功能
+class HelloJobServer(Thread):
+    def __init__(self, connfd):
         super().__init__()
         self.connfd = connfd
-        self.random_code = "123456"
-
+        self.random_code = ""
 
     def verify_code(self):
         str_code = ""
         for i in range(6):
-            str_code += str(random.randint(0,9))
+            str_code += str(random.randint(0, 9))
         return str_code
 
     # 处理客户端请求
     def run(self):
         # 循环接受请求
         while True:
-            data = self.connfd.recv(1024).decode()
-            print("Request:",data)
-            client_request = data.split(",")
-            print(client_request)
-            if not data:
+            recv_msg = self.connfd.recv(1024).decode()
+            print("Request:", recv_msg)
+            recv_msg = json.loads(recv_msg)
+            print(recv_msg)
+            if not recv_msg:
                 return
-            if client_request[0] == "login verification":
-                #Mysql查询账号密码的正确性   张志强
-                self.connfd.send(b"Hello")
-            elif client_request[0] == "mail_register_code":
+            # 应聘者登录系统
+            if recv_msg["request_type"] == "login verification":
+                # Mysql查询账号密码的正确性   张志强
+                verify_user_login_information(self.connfd, recv_msg["data"])
+            elif recv_msg["request_type"] == "mail_register_code":
                 self.random_code = self.verify_code()
                 print(self.random_code)
-                MailCode(client_request[1],self.random_code).mail_task()
-            elif client_request[0] == "submit_register":
-                if self.random_code == client_request[3]:
-                    #Mysql储存client_request账号(邮箱地址)  孙国建
-                    self.connfd.send("register_success".encode())
+                if MailCode(recv_msg["data"]["mailaddr"], self.random_code).mail_task():
+                    self.connfd.send(b"mailaddr ok")
                 else:
-                    self.connfd.send("验证码错误".encode())
-            elif client_request[0] == "search_position":
-                get_position(client_request)
+                    self.connfd.send(b"mailaddr error")
+            elif recv_msg["request_type"] == "submit_register":
+                print(self.random_code)
+                if self.random_code == recv_msg["data"]["verify_code"]:
+                    print("注册成功")
+                    # Mysql储存client_request账号(邮箱地址)  孙国建
+                    self.connfd.send("register success".encode())
+                else:
+                    self.connfd.send("code error".encode())
+            elif recv_msg["request_type"] == "search_position":
+                get_position(self.connfd, recv_msg["data"])
+            elif recv_msg["request_type"] == "initiate_chat":
+                initiate_chat(self.connfd,recv_msg["data"])
+            elif recv_msg["request_type"] == "search_applicant":
+                search_applicant(self.connfd,recv_msg["data"])
+            elif recv_msg["request_type"] == "upload_resume":
+                upload_resume(self.connfd,recv_msg["data"])
+            elif recv_msg["request_type"] == "download_resume":
+                download_resume(self.connfd,recv_msg["data"])
 
 
 # 网络功能
@@ -70,7 +86,7 @@ def main():
     s.bind(ADDR)
     s.listen(3)
 
-    print('Listen the port 8888...')
+    print('Listen the port 8042...')
     # 循环等待客户端连接
     while True:
         try:
@@ -84,9 +100,10 @@ def main():
             continue
 
         # 客户端连接 ，创建线程
-        t = FTPServer(c)
+        t = HelloJobServer(c)
         t.setDaemon(True)
         t.start()
+
 
 if __name__ == '__main__':
     main()

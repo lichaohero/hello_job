@@ -37,7 +37,9 @@ create table applicant
     password        varchar(20),
     account         varchar(20),
     login_time      datetime,
-    logout_time     datetime
+    logout_time     datetime,
+    wanted_position varchar(30),
+    wanted_salary DECIMAL(8,2)
 );
 
 
