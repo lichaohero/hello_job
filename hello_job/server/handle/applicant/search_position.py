@@ -9,11 +9,12 @@ from hello_job.server.model.position_model import PositionModel
 db = PositionModel()
 
 
-def get_position(connfd, name, position, salary, enterprise):
-    result = db.get_position(name, position, salary, enterprise)
+def get_position(connfd, data):
+
+    result = db.get_position(data["name"], data["position"], data["salary"], data["enterprise"])
     print(result)
     if not result:
-        connfd.send(b'FAIL')
+        connfd.send(b'get_position is null')
         return
     connfd.send(b'OK')
     for res in result:
