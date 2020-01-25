@@ -11,8 +11,9 @@ from threading import Thread
 
 # 全局变量
 from hello_job.client.sendmail import MailCode
-from hello_job.server.handle.applicant.applicant_regist import verify_user_login_information
+from hello_job.server.handle.applicant.applicant_regist import verify_user_login_information, register
 from hello_job.server.handle.applicant.search_position import get_position
+from hello_job.server.handle.enterprise.search_applicant import search_applicant
 
 HOST = '0.0.0.0'
 PORT = 8402
@@ -42,13 +43,13 @@ class HelloJobServer(Thread):
         # 循环接受请求
         while True:
             recv_msg = self.connfd.recv(1024).decode()
-            print("Request:", recv_msg)
             recv_msg = json.loads(recv_msg)
+            print("Request:", recv_msg)
             print(recv_msg)
             if not recv_msg:
                 return
             # 应聘者登录系统
-            if recv_msg["request_type"] == "login verification":
+            if recv_msg["request_type"] == "p_login_verification":
                 # Mysql查询账号密码的正确性   张志强
                 verify_user_login_information(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "mail_register_code":
@@ -61,21 +62,22 @@ class HelloJobServer(Thread):
             elif recv_msg["request_type"] == "submit_register":
                 print(self.random_code)
                 if self.random_code == recv_msg["data"]["verify_code"]:
-                    print("注册成功")
-                    # Mysql储存client_request账号(邮箱地址)  孙国建
-                    self.connfd.send("register success".encode())
+                    if register(self.connfd, recv_msg["data"]):
+                        print("注册成功")
+                        # Mysql储存client_request账号(邮箱地址)  孙国建
+                        self.connfd.send("register success".encode())
                 else:
                     self.connfd.send("code error".encode())
             elif recv_msg["request_type"] == "search_position":
                 get_position(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "initiate_chat":
-                initiate_chat(self.connfd,recv_msg["data"])
+                initiate_chat(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "search_applicant":
-                search_applicant(self.connfd,recv_msg["data"])
+                search_applicant(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "upload_resume":
-                upload_resume(self.connfd,recv_msg["data"])
+                upload_resume(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "download_resume":
-                download_resume(self.connfd,recv_msg["data"])
+                download_resume(self.connfd, recv_msg["data"])
 
 
 # 网络功能
