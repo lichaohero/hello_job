@@ -23,7 +23,7 @@ db = pymysql.connect(host="localhost",
                      port=3306,
                      user="root",
                      password="kai199418",
-                     database="school",
+                     database="recruitment",
                      charset="utf8")
 
 # 文件处理功能
