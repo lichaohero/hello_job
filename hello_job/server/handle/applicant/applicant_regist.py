@@ -16,7 +16,7 @@ def verify_user_login_information(connfd, data):
     :return: None
     """
     datalist = data.split(',')
-    # print(datalist[0],datalist[1],datalist[2],datalist[3])
+    # print(datalist[0],datalist[1],datalist[2])
     msg = umd.user_information_judgment(datalist[1], datalist[2])
     if msg == "No account":
         connfd.send(b"user not exist")  # 账号不存在
