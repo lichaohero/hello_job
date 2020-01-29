@@ -11,20 +11,19 @@ regist = UserRegistModel()
 def verify_user_login_information(connfd, data):
     """
     验证登录账号密码正确性，发送对应字节码
-    :Author: ZhiQiang
     :param name: 用户姓名
     :param passwd: 用户密码
     :return: None
     """
     datalist = data.split(',')
-    print(datalist[0],datalist[1],datalist[2],datalist[3])
-    # msg = umd.user_information_judgment(name, passwd)
-    # if msg == "No account":
-    #     connfd.send(b"user not exist")  # 账号不存在
-    # elif msg == "Password wrong":
-    #     connfd.send(b"password error")  # 密码错误
-    # elif msg == "Right":
-    #     connfd.send(b"check pass")  # 审核通过
+    # print(datalist[0],datalist[1],datalist[2],datalist[3])
+    msg = umd.user_information_judgment(datalist[1], datalist[2])
+    if msg == "No account":
+        connfd.send(b"user not exist")  # 账号不存在
+    elif msg == "Password wrong":
+        connfd.send(b"password error")  # 密码错误
+    elif msg == "Right":
+        connfd.send(b"check pass")  # 审核通过
 
     # 验证求职者能否注册
 def register(connfd, data):
