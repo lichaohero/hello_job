@@ -27,17 +27,17 @@ def verify_user_login_information(connfd, data):
     #     connfd.send(b"check pass")  # 审核通过
 
     # 验证求职者能否注册
-# def register(connfd, data):
-#     datalist = data.split(',')
-#     print("datalist[3]:", datalist[3])
-#     vali_result = regist.selectapplicant(datalist[1], datalist[3])
-#     print("vali_result：", vali_result)
-#     if vali_result:
-#         if vali_result[0][0] == datalist[1]:
-#             connfd.send('user already exists'.encode())
-#             return
-#         if vali_result[0][2] == datalist[3]:
-#             connfd.send('email already exists'.encode())
-#             return
-#     num = regist.insertapplicant(datalist[1], datalist[2], datalist[3])
-#     return num
+def register(connfd, data):
+    datalist = data.split(',')
+    print("datalist[3]:", datalist[3])
+    vali_result = regist.selectapplicant(datalist[1], datalist[3])
+    print("vali_result：", vali_result)
+    if vali_result:
+        if vali_result[0][0] == datalist[1]:
+            connfd.send('user already exists'.encode())
+            return
+        if vali_result[0][2] == datalist[3]:
+            connfd.send('email already exists'.encode())
+            return
+    num = regist.insertapplicant(datalist[1], datalist[2], datalist[3])
+    return num
