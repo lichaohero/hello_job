@@ -6,7 +6,7 @@ class UserModel:
         self.db = pymysql.connect(host='localhost',
                                   port=3306,
                                   user='root',
-                                  password='Tvxq5forever',
+                                  password='Zhangzhiqiang',
                                   database='recruit',
                                   charset='utf8')
 
