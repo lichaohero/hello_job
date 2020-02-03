@@ -9,9 +9,9 @@ from hello_job.server.model.position_model import PositionModel
 db = PositionModel()
 
 
-def get_position(connfd, data):
+def search_position(connfd, data):
 
-    result = db.get_position(data["name"], data["position"], data["salary"], data["enterprise"])
+    result = db.get_position(data["account"], data["position"], data["salary"], data["enterprise"])
     print(result)
     if not result:
         connfd.send(b'get_position is null')
@@ -23,4 +23,3 @@ def get_position(connfd, data):
     sleep(0.1)
     connfd.send(b'##')
 
-# get_position("刘强",'试',5000,"里巴巴")
