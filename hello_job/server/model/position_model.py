@@ -43,5 +43,6 @@ class PositionModel:
         return self.cur.fetchall()
 
 
-model = PositionModel()
-print(model.get_position("刘强", None, "0-20000", "里巴巴"))
+if __name__ == '__main__':
+    model = PositionModel()
+    print(model.get_position("刘强", None, "0-20000", "里巴巴"))
