@@ -11,9 +11,9 @@ regist = UserRegistModel()
 def verify_user_login_information(connfd, data):
     """
     验证登录账号密码正确性，发送对应字节码
-    :param name: 用户姓名
-    :param passwd: 用户密码
-    :return: None
+    :param connfd: 客户端
+    :param data: 用户信息包
+    :return: Non]
     """
     msg = umd.user_information_judgment(data["name"], data["passwd"])
     if msg == "No account":
@@ -23,7 +23,8 @@ def verify_user_login_information(connfd, data):
     elif msg == "Right":
         connfd.send(b"check pass")  # 审核通过
 
-    # 验证求职者能否注册
+
+# 验证求职者能否注册
 def register(connfd, data):
     datalist = data.split(',')
     print("datalist[3]:", datalist[3])

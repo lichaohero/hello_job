@@ -64,10 +64,21 @@ class UserModel:
             else:
                 return "Right"
 
+    def update_user_information(self, name, salary, position, resume):
+        """
+        更新用户信息，用于完善
+        :param name: 用户名
+        :param salary: 期望工资
+        :param position: 期望岗位
+        :param resume: 个人简历
+        :return: 对应成败信息
+        """
+        pass
+
 
 class UserRegistModel:
-    def __init__(self,host='localhost',port=3306,user='root',password='',
-                 database='AID1911',charset='utf8'):
+    def __init__(self, host='localhost', port=3306, user='root', password='',
+                 database='AID1911', charset='utf8'):
         self.host = host
         self.port = port
         self.user = user
@@ -76,27 +87,27 @@ class UserRegistModel:
         self.charset = charset
         # 连接数据库
         self.db = pymysql.connect(host='localhost',
-                             port=3306,
-                             user='root',
-                             password='',
-                             database='AID1911',
-                             charset='utf8')
+                                  port=3306,
+                                  user='root',
+                                  password='',
+                                  database='AID1911',
+                                  charset='utf8')
         # 生成游标对象（操作数据库，执行sql语句，获取结果）
         self.cur = self.db.cursor()
 
-    #查询求职者
-    def selectapplicant(self,account,email):
+    # 查询求职者
+    def selectapplicant(self, account, email):
         sql = 'select account,password,mail_addr from applicant' \
               ' where account=%s or mail_addr=%s;'
-        self.cur.execute(sql,[account,email])
+        self.cur.execute(sql, [account, email])
         result = self.cur.fetchall()
         return result
 
-    def insertapplicant(self,account,password,mail_addr):
+    def insertapplicant(self, account, password, mail_addr):
         sql = 'insert into applicant(account,password,mail_addr)' \
               ' values(%s,%s,%s);'
         try:
-            num = self.cur.execute(sql,[account,password,mail_addr])
+            num = self.cur.execute(sql, [account, password, mail_addr])
             self.db.commit()
             return num
         except:
