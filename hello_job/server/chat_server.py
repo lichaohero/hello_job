@@ -11,9 +11,18 @@ from threading import Thread
 
 # 全局变量
 from hello_job.client.sendmail import MailCode
+from hello_job.server.handle.applicant.applicant import *
 from hello_job.server.handle.applicant.applicant_regist import verify_user_login_information, register
-from hello_job.server.handle.applicant.search_position import get_position
+from hello_job.server.handle.applicant.search_position import search_position
 from hello_job.server.handle.enterprise.search_applicant import search_applicant
+from hello_job.config import host, port, user, password, database
+
+db = pymysql.connect(host=host,
+                     port=port,
+                     user=user,
+                     password=password,
+                     database=database,
+                     charset='utf8')
 
 HOST = '0.0.0.0'
 PORT = 8402
@@ -32,12 +41,6 @@ class HelloJobServer(Thread):
         self.connfd = connfd
         self.random_code = ""
 
-    def verify_code(self):
-        str_code = ""
-        for i in range(6):
-            str_code += str(random.randint(0, 9))
-        return str_code
-
     # 处理客户端请求
     def run(self):
         # 循环接受请求
@@ -45,7 +48,6 @@ class HelloJobServer(Thread):
             recv_msg = self.connfd.recv(1024).decode()
             recv_msg = json.loads(recv_msg)
             print("Request:", recv_msg)
-            print(recv_msg)
             if not recv_msg:
                 return
             # 应聘者登录系统
@@ -53,31 +55,21 @@ class HelloJobServer(Thread):
                 # Mysql查询账号密码的正确性   张志强
                 verify_user_login_information(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "mail_register_code":
-                self.random_code = self.verify_code()
-                print(self.random_code)
-                if MailCode(recv_msg["data"]["mailaddr"], self.random_code).mail_task():
-                    self.connfd.send(b"mailaddr ok")
-                else:
-                    self.connfd.send(b"mailaddr error")
+                mail_register_code(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "submit_register":
-                print(self.random_code)
-                if self.random_code == recv_msg["data"]["verify_code"]:
-                    if register(self.connfd, recv_msg["data"]):
-                        print("注册成功")
-                        # Mysql储存client_request账号(邮箱地址)  孙国建
-                        self.connfd.send("register success".encode())
-                else:
-                    self.connfd.send("code error".encode())
+                submit_register(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "search_position":
-                get_position(self.connfd, recv_msg["data"])
-            elif recv_msg["request_type"] == "initiate_chat":
-                initiate_chat(self.connfd, recv_msg["data"])
+                search_position(self.connfd, db, recv_msg["data"])
+            # elif recv_msg["request_type"] == "initiate_chat":
+            #     initiate_chat(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "search_applicant":
                 search_applicant(self.connfd, recv_msg["data"])
-            elif recv_msg["request_type"] == "upload_resume":
-                upload_resume(self.connfd, recv_msg["data"])
-            elif recv_msg["request_type"] == "download_resume":
-                download_resume(self.connfd, recv_msg["data"])
+            # elif recv_msg["request_type"] == "upload_resume":
+            #     upload_resume(self.connfd, recv_msg["data"])
+            # elif recv_msg["request_type"] == "download_resume":
+            #     download_resume(self.connfd, recv_msg["data"])
+            # elif recv_msg["request_type"] == "add_position":
+            #     add_position(self.connfd, recv_msg["data"])
 
 
 # 网络功能
