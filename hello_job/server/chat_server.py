@@ -13,7 +13,7 @@ from threading import Thread
 from hello_job.client.sendmail import MailCode
 from hello_job.server.handle.applicant.applicant import *
 from hello_job.server.handle.applicant.applicant_regist import verify_user_login_information, register
-from hello_job.server.handle.applicant.search_position import search_position
+from hello_job.server.handle.applicant.search_position import *
 from hello_job.server.handle.enterprise.search_applicant import search_applicant
 from hello_job.config import host, port, user, password, database
 
@@ -68,8 +68,8 @@ class HelloJobServer(Thread):
             #     upload_resume(self.connfd, recv_msg["data"])
             # elif recv_msg["request_type"] == "download_resume":
             #     download_resume(self.connfd, recv_msg["data"])
-            # elif recv_msg["request_type"] == "add_position":
-            #     add_position(self.connfd, recv_msg["data"])
+            elif recv_msg["request_type"] == "add_position":
+                add_position(self.connfd, db, recv_msg["data"])
 
 
 # 网络功能
