@@ -2,14 +2,8 @@ import pymysql
 
 
 class UserModel:
-    def __init__(self):
-        self.db = pymysql.connect(host='localhost',
-                                  port=3306,
-                                  user='root',
-                                  password='Zhangzhiqiang',
-                                  database='recruit',
-                                  charset='utf8')
-
+    def __init__(self, db):
+        self.db = db
         self.cur = self.db.cursor()
 
     def close(self):

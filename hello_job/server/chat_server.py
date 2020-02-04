@@ -53,7 +53,7 @@ class HelloJobServer(Thread):
             # 应聘者登录系统
             if recv_msg["request_type"] == "p_login_verification":
                 # Mysql查询账号密码的正确性   张志强
-                verify_user_login_information(self.connfd, recv_msg["data"])
+                verify_user_login_information(self.connfd, db, recv_msg["data"])
             elif recv_msg["request_type"] == "mail_register_code":
                 mail_register_code(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "submit_register":
