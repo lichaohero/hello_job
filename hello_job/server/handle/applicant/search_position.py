@@ -9,8 +9,7 @@ from time import sleep
 from hello_job.server.model.position_model import PositionModel
 
 
-
-def search_position(connfd,dbc, data):
+def search_position(connfd, dbc, data):
     db = PositionModel(dbc)
 
     result = db.get_position(data["account"], data["position"], data["salary"], data["enterprise"])
@@ -43,15 +42,18 @@ def search_position(connfd,dbc, data):
     connfd.send(b'##')
 
 
-def add_position(data):
+def add_position(connfd, dbc, data):
+    db = PositionModel(dbc)
     print(data["account"])
     hr_info = db.get_hr(data["account"])
-    print(hr_info)
+    print(hr_info[0], hr_info[2])
+    result = db.add_position(data["position"], data["salary"], data["duties"], hr_info[0], hr_info[2])
+    print(result)
+    if result:
+        connfd.send(b'add_success')
+    else:
+        connfd.send(b'add_fail')
 
 
 if __name__ == '__main__':
-    # data = '{"account": "alizhangsan", "postion": "开发工程师", "duties": "负责开发工作","salary": "23000"}'
-    # add_position(data)
-
-    res = str(Decimal('6000.00').quantize(Decimal('0.0')))
-    print(res)
+    data = '{"account": "alizhangsan", "postion": "开发工程师", "duties": "负责开发工作","salary": "23000"}'
