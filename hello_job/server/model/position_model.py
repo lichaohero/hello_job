@@ -1,29 +1,20 @@
 import pymysql
-from hello_job.config import host, port, user, password, database
-
-db = pymysql.connect(host=host,
-                     port=port,
-                     user=user,
-                     password=password,
-                     database=database,
-                     charset='utf8')
-
-cur = db.cursor()
 
 
 class PositionModel:
-    def __init__(self):
-        pass
+    def __init__(self, db):
+        self.db = db
+        self.cur = self.db.cursor()
 
-    def close(self):
-        cur.close()
-        db.close()
+    # def close(self):
+    #     cur.close()
+    #     db.close()
 
     def get_position(self, account, position, salary, enterprise):
         if not position and not salary and not enterprise:
             sql = "select wanted_position from applicant where account='%s';" % account
-            cur.execute(sql)
-            result = cur.fetchone()
+            self.cur.execute(sql)
+            result = self.cur.fetchone()
             position = result[0]
 
         sql = "select position.name,enterprise.enterprise_name,position.month_pay,position.content,hr.name from position " \
@@ -37,26 +28,26 @@ class PositionModel:
         if enterprise:
             sql += " and enterprise.enterprise_name regexp '%s'" % (r'.*' + enterprise + '.*')
         print(sql)
-        cur.execute(sql)
-        return cur.fetchall()
+        self.cur.execute(sql)
+        return self.cur.fetchall()
 
     def add_position(self, name, month_pay, content, hr_id, enterprise_id):
         sql = "insert into position (name,month_pay,content,hr_id,enterprise_id) values ('%s','%s','%s',%s,%s)" % (
             name, month_pay, content, hr_id, enterprise_id)
         try:
             print(sql)
-            cur.execute(sql)
-            db.commit()
+            self.cur.execute(sql)
+            self.db.commit()
             return 1
         except:
-            db.rollback()
+            self.db.rollback()
             return 0
 
     def get_hr(self, account):
         sql = "select * from hr where hr_account = '%s'" % account
         print(sql)
-        cur.execute(sql)
-        return cur.fetchone()
+        self.cur.execute(sql)
+        return self.cur.fetchone()
 
 
 if __name__ == '__main__':

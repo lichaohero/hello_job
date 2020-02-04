@@ -8,10 +8,11 @@ from time import sleep
 
 from hello_job.server.model.position_model import PositionModel
 
-db = PositionModel()
 
 
-def search_position(connfd, data):
+def search_position(connfd,dbc, data):
+    db = PositionModel(dbc)
+
     result = db.get_position(data["account"], data["position"], data["salary"], data["enterprise"])
     print(result)
     if not result:
