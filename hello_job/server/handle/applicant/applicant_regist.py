@@ -11,6 +11,7 @@ def verify_user_login_information(connfd, db, data):
     """
     验证登录账号密码正确性，发送对应字节码
     :param connfd: 客户端
+    :param db: 数据库
     :param data: 用户信息包
     :return: Non]
     """
@@ -26,8 +27,9 @@ def verify_user_login_information(connfd, db, data):
 
 def complete_user_information(connfd, db, data):
     """
-    完善用户信息
+    完善用户信息，发送对应成败字节码
     :param connfd: 客户端
+    :param db: 数据库
     :param data: 用户信息包
     :return: None
     """
@@ -36,19 +38,19 @@ def complete_user_information(connfd, db, data):
     if result == "name updates has succeeded":
         connfd.send(b"name_ok")
     else:
-        connfd.send(b"name_error %s" % result)
+        connfd.send(b"name_error_%s" % result)
     if result == "salary updates has succeeded":
         connfd.send(b"salary_ok")
     else:
-        connfd.send(b"salary_error %s" % result)
+        connfd.send(b"salary_error_%s" % result)
     if result == "position updates has succeeded":
         connfd.send(b"position_ok")
     else:
-        connfd.send(b"position_error %s" % result)
+        connfd.send(b"position_error_%s" % result)
     if result == "resume updates has succeeded":
         connfd.send(b"resume_ok")
     else:
-        connfd.send(b"resume_error %s" % result)
+        connfd.send(b"resume_error_%s" % result)
 
 
 # 验证求职者能否注册
