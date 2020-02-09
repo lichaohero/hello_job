@@ -58,7 +58,7 @@ class UserModel:
             else:
                 return "Right"
 
-    def update_user_information(self, account, name, salary, position, resume):
+    def update_user_information(self, account, name, salary, position):
         """
         更新用户信息，用于完善
         :param name: 用户名
@@ -67,9 +67,9 @@ class UserModel:
         :param resume: 个人简历
         :return: True or False
         """
-        updateInfo = "update applicant set name=%s,wanted_position=%s,wanted_salary=%s,resume=%s where account=%s;"
+        updateInfo = "update applicant set name=%s,wanted_position=%s,wanted_salary=%s where account=%s;"
         try:
-            self.cur.execute(updateInfo, [name, position, salary, resume, account])
+            self.cur.execute(updateInfo, [name, position, salary, account])
             self.db.commit()
             return True
         except:

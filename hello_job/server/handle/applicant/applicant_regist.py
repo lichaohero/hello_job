@@ -37,7 +37,7 @@ def complete_user_information(connfd, db, data):
     :return: None
     """
     usrdb = UserModel(db)
-    result = usrdb.update_user_information(data["account"],data["name"], data["salary"], data["position"], data["resume"])
+    result = usrdb.update_user_information(data["account"],data["name"], data["salary"], data["position"])
     if result:
         connfd.send(b"Mission_Completed")
         return
