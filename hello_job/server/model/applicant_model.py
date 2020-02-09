@@ -46,8 +46,8 @@ class UserModel:
         :param passwd: 密码
         :return: 对应判断字符串
         """
-        sql_name = "select name from applicant where name=%s"
-        sql_passwd = "select password from applicant where name=%s"
+        sql_name = "select name from applicant where name=%s;"
+        sql_passwd = "select password from applicant where name=%s;"
         self.cur.execute(sql_name, [name])
         if not self.cur.fetchone():
             return "No account"
@@ -58,16 +58,23 @@ class UserModel:
             else:
                 return "Right"
 
-    def update_user_information(self, name, salary, position, resume):
+    def update_user_information(self, account, name, salary, position, resume):
         """
         更新用户信息，用于完善
         :param name: 用户名
         :param salary: 期望工资
         :param position: 期望岗位
         :param resume: 个人简历
-        :return: 对应成败信息
+        :return: True or False
         """
-        pass
+        updateInfo = "update applicant set name=%s,wanted_position=%s,wanted_salary=%s,resume=%s where account=%s;"
+        try:
+            self.cur.execute(updateInfo, [name, position, salary, resume, account])
+            self.db.commit()
+            return True
+        except:
+            self.db.rollback()
+            return False
 
 
 class UserRegistModel:

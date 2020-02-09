@@ -13,16 +13,19 @@ def verify_user_login_information(connfd, db, data):
     :param connfd: 客户端
     :param db: 数据库
     :param data: 用户信息包
-    :return: Non]
+    :return: None
     """
     umd = UserModel(db)
     msg = umd.user_information_judgment(data["name"], data["passwd"])
     if msg == "No account":
         connfd.send(b"user_not_exist")  # 账号不存在
+        return
     elif msg == "Password wrong":
         connfd.send(b"password_error")  # 密码错误
+        return
     elif msg == "Right":
         connfd.send(b"password_right")  # 审核通过
+        return
 
 
 def complete_user_information(connfd, db, data):
@@ -34,23 +37,13 @@ def complete_user_information(connfd, db, data):
     :return: None
     """
     usrdb = UserModel(db)
-    result = usrdb.update_user_information(data["name"], data["salary"], data["position"], data["resume"])
-    if result == "name updates has succeeded":
-        connfd.send(b"name_ok")
+    result = usrdb.update_user_information(data["account"],data["name"], data["salary"], data["position"], data["resume"])
+    if result:
+        connfd.send(b"Mission_Completed")
+        return
     else:
-        connfd.send(b"name_error_%s" % result)
-    if result == "salary updates has succeeded":
-        connfd.send(b"salary_ok")
-    else:
-        connfd.send(b"salary_error_%s" % result)
-    if result == "position updates has succeeded":
-        connfd.send(b"position_ok")
-    else:
-        connfd.send(b"position_error_%s" % result)
-    if result == "resume updates has succeeded":
-        connfd.send(b"resume_ok")
-    else:
-        connfd.send(b"resume_error_%s" % result)
+        connfd.send(b"Mission_failed")
+        return
 
 
 # 验证求职者能否注册
