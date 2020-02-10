@@ -17,7 +17,7 @@ class PositionModel:
             result = self.cur.fetchone()
             position = result[0]
 
-        sql = "select position.name,enterprise.enterprise_name,position.month_pay,position.content,hr.name from position " \
+        sql = "select position.name,enterprise.enterprise_name,position.month_pay,position.content,hr.name,position.hr_id from position " \
               "inner join enterprise on position.enterprise_id=enterprise.id " \
               "inner join hr on position.hr_id = hr.id where 1=1"
         if position:
