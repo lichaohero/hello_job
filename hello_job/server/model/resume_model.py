@@ -1,6 +1,3 @@
-import pymysql
-
-
 class ResumeServer:
 
     def __init__(self, db):
@@ -11,8 +8,8 @@ class ResumeServer:
         self.cur.close()
         self.db.close()
 
-    def resume_processing(self):
+    def resume_processing(self, data):
         pass
 
-    def information_store(self):
+    def resume_path_information(self, data):
         pass

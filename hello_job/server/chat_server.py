@@ -58,10 +58,10 @@ class HelloJobServer(Thread):
                 verify_user_login_information(self.connfd, db, recv_msg["data"])
             elif recv_msg["request_type"] == "p_submit_info":
                 # 上传用户简历  张志强
-                upload_user_resume(self.connfd, db, recv_msg["data"])
+                upload_user_resume(db, recv_msg["data"])
             elif recv_msg["request_type"] == "download_resume":
                 # 下载用户简历  张志强
-                download_user_resume(self.connfd, db, recv_msg["data"])
+                download_user_resume(db, recv_msg["data"])
             elif recv_msg["request_type"] == "mail_register_code":
                 mail_register_code(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "submit_register":
