@@ -18,7 +18,7 @@ def search_position(connfd, dbc, data):
         connfd.send(b'get_position is null')
         return
     connfd.send(b'OK')
-    column = ("position", "enterprise", "salary", "duties", "hr")
+    column = ("position", "enterprise", "salary", "duties", "hr", "hr_id")
     list_result = []
     for res in result:
         dict_res = {}
