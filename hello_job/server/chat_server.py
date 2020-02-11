@@ -3,6 +3,7 @@ ftp 文件服务器，服务端
 env: python3.6
 多线程并发，socket
 """
+import pymysql
 import json
 import random
 import sys
@@ -16,6 +17,7 @@ from hello_job.server.handle.applicant.applicant_regist import verify_user_login
 from hello_job.server.handle.applicant.search_position import *
 from hello_job.server.handle.enterprise.search_applicant import search_applicant
 from hello_job.config import host, port, user, password, database
+from hello_job.server.ftp.resume import upload_user_resume, download_user_resume
 
 db = pymysql.connect(host=host,
                      port=port,
@@ -54,6 +56,10 @@ class HelloJobServer(Thread):
             if recv_msg["request_type"] == "p_login_verification":
                 # Mysql查询账号密码的正确性   张志强
                 verify_user_login_information(self.connfd, db, recv_msg["data"])
+            elif recv_msg["request_type"] == "p_submit_info":
+                upload_user_resume(self.connfd, db, recv_msg["data"])
+            elif recv_msg["request_type"] == "download_resume":
+                download_user_resume(self.connfd, db, recv_msg["data"])
             elif recv_msg["request_type"] == "mail_register_code":
                 mail_register_code(self.connfd, recv_msg["data"])
             elif recv_msg["request_type"] == "submit_register":
