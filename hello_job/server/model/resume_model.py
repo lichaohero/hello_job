@@ -1,6 +1,3 @@
-import pymysql
-
-
 class ResumeServer:
 
     def __init__(self, db):
