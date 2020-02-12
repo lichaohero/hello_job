@@ -12,10 +12,10 @@ def upload_user_resume(db, data):
     上传用户简历
     :param db: 数据库
     :param data: 传入数据
-    :return: 简历保存路径
+    :return: 简历保存路径或回复失败
     """
     redb = ResumeServer(db)
-    return redb.resume_path_information(data["resume"])
+    return redb.resume_upload(data["resume"], data["account"])
 
 
 def download_user_resume(db, data):
@@ -24,7 +24,7 @@ def download_user_resume(db, data):
     :param connfd: 客户端
     :param db: 数据库
     :param data: 传入数据
-    :return: 用户简历
+    :return: 用户简历或简历不存在信息
     """
     redb = ResumeServer(db)
-    return redb.resume_processing(data["applicant_id"])
+    return redb.resume_download(data["applicant_id"])
