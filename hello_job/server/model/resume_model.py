@@ -29,7 +29,7 @@ class ResumeServer:
         对简历上传的操作
         :param data: 客户端的用户简历
         :param account: 用户账号
-        :return: 简历存储路径或对应错误信息
+        :return: 简历存储路径 或 对应错误信息
         """
         filePath = self.write_file(data, account)
         pathSql = "update applicant set resume_path=%s where account=%s;"
@@ -45,7 +45,7 @@ class ResumeServer:
         """
         对简历下载的操作
         :param data: 客户端的用户简历
-        :return: 用户简历或简历不存在信息
+        :return: 用户简历 或 不存在
         """
         pathSql = "select resume_path from applicant where id=%s;"
         self.cur.execute(pathSql, [userId])
