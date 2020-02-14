@@ -12,7 +12,7 @@ class ResumeServer:
         """
         对简历下载的操作
         :param data: 客户端的用户简历
-        :return: 用户简历 或 不存在
+        :return: 用户简历字符串 或 不存在
         """
         pathSql = "select resume_path from applicant where id=%s;"
         self.cur.execute(pathSql, [userId])
@@ -20,7 +20,8 @@ class ResumeServer:
         if not resumePath:
             return "Nothing_here"
         else:
-            file = open(resumePath, "rb")
+            Path = resumePath[-1]
+            file = open(Path, "rb")
             data = file.read()
             file.close()
-            return data
+            return data.decode()

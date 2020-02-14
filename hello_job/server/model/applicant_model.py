@@ -67,7 +67,7 @@ class UserModel:
         :return: 简历存储路径
         """
         file = open(self.FTP_path + account, "wb")
-        file.write(resume)
+        file.write(resume.encode("utf-8"))
         file.close()
         return self.FTP_path + account
 
@@ -80,10 +80,13 @@ class UserModel:
         :param resume: 个人简历
         :return: True or False
         """
-        resume_path = self.write_file(resume, account)
+        if resume == "":
+            resume_path = self.FTP_path + account
+        else:
+            resume_path = self.write_file(resume, account)
         updateInfo = "update applicant set name=%s,wanted_position=%s,wanted_salary=%s,resume_path=%s where account=%s;"
         try:
-            self.cur.execute(updateInfo, [name, position, salary, account, resume_path])
+            self.cur.execute(updateInfo, [name, position, salary, resume_path, account])
             self.db.commit()
             return True
         except:

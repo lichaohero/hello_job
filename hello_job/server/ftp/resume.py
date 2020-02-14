@@ -13,7 +13,7 @@ def download_user_resume(db, data):
     :param connfd: 客户端
     :param db: 数据库
     :param data: 传入数据
-    :return: 没有简历 或 简历数据
+    :return: 没有简历 或 简历字符串
     """
     redb = ResumeServer(db)
     return redb.resume_download(data["applicant_id"])
