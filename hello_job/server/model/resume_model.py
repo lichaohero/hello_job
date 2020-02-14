@@ -17,11 +17,11 @@ class ResumeServer:
         pathSql = "select resume_path from applicant where id=%s;"
         self.cur.execute(pathSql, [userId])
         resumePath = self.cur.fetchone()
-        if not resumePath:
-            return "Nothing_here"
-        else:
-            Path = resumePath[-1]
+        Path = "".join(resumePath)
+        if Path:
             file = open(Path, "rb")
             data = file.read()
             file.close()
             return data.decode()
+        else:
+            return "Nothing"
