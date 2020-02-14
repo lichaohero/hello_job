@@ -17,7 +17,8 @@ from hello_job.server.handle.applicant.applicant_regist import verify_user_login
 from hello_job.server.handle.applicant.search_position import *
 from hello_job.server.handle.enterprise.search_applicant import search_applicant
 from hello_job.config import host, port, user, password, database
-from hello_job.server.ftp.resume import upload_user_resume, download_user_resume
+from hello_job.server.handle.applicant.applicant_regist import complete_user_information
+from hello_job.server.ftp.resume import download_user_resume
 
 db = pymysql.connect(host=host,
                      port=port,
@@ -57,8 +58,8 @@ class HelloJobServer(Thread):
                 # Mysql查询账号密码的正确性   张志强
                 verify_user_login_information(self.connfd, db, recv_msg["data"])
             elif recv_msg["request_type"] == "p_submit_info":
-                # 上传用户简历  张志强
-                upload_user_resume(db, recv_msg["data"])
+                # 完善用户信息  张志强
+                complete_user_information(self.connfd, db, recv_msg["data"])
             elif recv_msg["request_type"] == "download_resume":
                 # 下载用户简历  张志强
                 download_user_resume(db, recv_msg["data"])

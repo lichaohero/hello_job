@@ -5,6 +5,7 @@ class UserModel:
     def __init__(self, db):
         self.db = db
         self.cur = self.db.cursor()
+        self.FTP_path = "/Users/zhiqiang/Desktop/FTP_store/"  # FTP文件库位置
 
     def close(self):
         self.cur.close()
@@ -58,7 +59,19 @@ class UserModel:
             else:
                 return "Right"
 
-    def update_user_information(self, account, name, salary, position):
+    def write_file(self, resume, account):
+        """
+        文件写入操作
+        :param resume: 简历数据
+        :param account: 用户账号
+        :return: 简历存储路径
+        """
+        file = open(self.FTP_path + account, "wb")
+        file.write(resume)
+        file.close()
+        return self.FTP_path + account
+
+    def update_user_information(self, account, name, salary, position, resume):
         """
         更新用户信息，用于完善
         :param name: 用户名
@@ -67,9 +80,10 @@ class UserModel:
         :param resume: 个人简历
         :return: True or False
         """
-        updateInfo = "update applicant set name=%s,wanted_position=%s,wanted_salary=%s where account=%s;"
+        resume_path = self.write_file(resume, account)
+        updateInfo = "update applicant set name=%s,wanted_position=%s,wanted_salary=%s,resume_path=%s where account=%s;"
         try:
-            self.cur.execute(updateInfo, [name, position, salary, account])
+            self.cur.execute(updateInfo, [name, position, salary, account, resume_path])
             self.db.commit()
             return True
         except:
