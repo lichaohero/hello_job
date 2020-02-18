@@ -100,7 +100,7 @@ class PersonalLogin:
         elif not user_pwd:
             tkinter.messagebox.showinfo(title='Hello Job', message='密码不能为空')
         else:
-            data = {"request_type": "p_login_verification", "data": {"username": user_name, "password": user_pwd}}
+            data = {"request_type": "p_login_verification", "data": {"account": user_name, "password": user_pwd}}
             hj_sock.send(json.dumps(data).encode())
             self.check_login()
 
@@ -111,7 +111,7 @@ class PersonalLogin:
             tkinter.messagebox.showinfo(title='Hello Job', message='账号不存在')
         elif data == "password_error":
             tkinter.messagebox.showinfo(title='Hello Job', message='密码错误')
-        elif data == "allow_p_login":
+        elif data == "allow_login":
             login_account = self.var_usr_name.get()
             self.window.destroy()
             global pview_tk
@@ -186,7 +186,7 @@ class PersonalRegister:
         verify_code = self.verify_code.get()
         if self.check_pwd(new_pwd, confirm_pwd):
             data = {"request_type": "submit_register", "data":
-                {"p_account": new_user, "password": new_pwd, "verify_code": verify_code}}
+                {"account": new_user, "password": new_pwd, "verify_code": verify_code}}
             hj_sock.send(json.dumps(data).encode())
             self.check_regist()
 
@@ -207,13 +207,15 @@ class PersonalRegister:
     # 接收服务回复，账号是否已存在，验证码是否有问题，注册成功，退出窗口
     def check_regist(self):
         data = hj_sock.recv(1024).decode()
-        if data == "name_exists":
-            tkinter.messagebox.showinfo(title='Hello Job', message='账号已被注册')
-        if data == "register_success":
+        if data == "regist_success":
             tkinter.messagebox.showinfo(title='Hello Job', message='注册成功')
             self.window.destroy()
-        if data == "code_error":
+        elif data == "account_exists":
+            tkinter.messagebox.showinfo(title='Hello Job', message='账号已被注册')
+        elif data == "code_error":
             tkinter.messagebox.showinfo(title='Hello Job', message='验证码有误')
+        elif data == "unknown_error":
+            tkinter.messagebox.showinfo(title='Hello Job', message='未知错误')
 
     def user_quit(self):
         self.window.destroy()
@@ -222,8 +224,7 @@ class PersonalRegister:
 # 个人操作界面
 class PersonalView(Thread):
     ADDR = ('127.0.0.1', 8401)
-    chat_sock = socket()
-    chat_sock.connect(ADDR)
+    chat_sock = socket(AF_INET, SOCK_DGRAM)
 
     def __init__(self, master, account):
         super().__init__()
@@ -237,7 +238,8 @@ class PersonalView(Thread):
         self.control_layout()
         self.account = account
         self.chat_info = ""
-        self.choose_info = ""
+        self.choose_hr = ""
+        self.hr_dict={}
 
     def control_layout(self):
         Label(self.window, text='找工作，就来Hello Job!!!', font=("黑体", 25)).place(x=50, y=50)
@@ -301,18 +303,15 @@ class PersonalView(Thread):
         salary_range = self.salary_range.get()
         if salary_range == "20000以上":
             data = {"request_type": "search_position", "data":
-                {"account": self.account,  "position": postion_name,"salary": "20000-999999","enterprise": company_name
+                {"account": self.account, "position": postion_name, "salary": "20000-999999", "enterprise": company_name
                  }}
-            print(data)
             hj_sock.send(json.dumps(data).encode())
         else:
             data = {"request_type": "search_position", "data":
-                {"account": self.account,  "position": postion_name,"salary": salary_range,"enterprise": company_name
+                {"account": self.account, "position": postion_name, "salary": salary_range, "enterprise": company_name
                  }}
-            print(data)
             hj_sock.send(json.dumps(data).encode())
         rec_data = hj_sock.recv(1024 * 1024).decode()
-        print(rec_data)
         if rec_data == "get_position_failed":
             tkinter.messagebox.showinfo(title='Hello Job', message='没有找到符合的工作')
         elif rec_data == "get_position_success":
@@ -329,24 +328,27 @@ class PersonalView(Thread):
     def insert_jobdata(self):
         rec_data = hj_sock.recv(1024 * 1024).decode()
         result = json.loads(rec_data)
+        self.hr_dict.clear()
         for i in result["data"]:
-            list = [i['position'],i['enterprise'],i['salary'],i['duties'],i['hr']]
-            # li = ["工程师", "百度科技有限公司", "20000", "吃喝玩乐", "迪丽热巴" + str(i)]
+            list = (i['position'], i['enterprise'], i['salary'], i['duties'], i['hr'])
+            self.hr_dict[str(list)] =i["hr_account"]
             self.data_tree.insert('', 'end', values=list)
+        print(self.hr_dict)
+
 
     # 双击HR聊天,调取聊天室,如果切换了聊天对象，则清空收消息框的内容。提示与谁聊天中
     def treeviewClick(self, event):
         for item in self.data_tree.selection():
-            self.choose_info = self.data_tree.item(item, "values")
-        print(self.choose_info)
-        if self.chat_info != self.choose_info:
-            data = {"request_type": "p_get_record", "data":
-                {"From": self.choose_info[4], "To": self.account}}
-            tip = "与%s沟通中..." % self.choose_info[4]
-            self.tip_chat = Label(self.window, text=tip, font=("黑体", 15)).place(x=700, y=120)
-            self.chat_sock.send(json.dumps(data).encode())
+            self.choose_hr = self.data_tree.item(item, "values")
+        print(self.choose_hr)
+        if self.chat_info != self.choose_hr:
+            # data = {"request_type": "p_get_record", "data":
+            #     {"From": self.choose_info[4], "To": self.account}}
+            # tip = "与%s沟通中..." % self.choose_info[4]
+            # self.tip_chat = Label(self.window, text=tip, font=("黑体", 15)).place(x=700, y=120)
+            # self.chat_sock.send(json.dumps(data).encode())
             self.text_msglist.delete('0.0', END)
-            self.chat_info = self.choose_info
+            self.chat_info = self.choose_hr
 
     # 发送聊天信息，不能发送空内容，发送From,To,时间,内容到服务器
     def send_chatmsg(self):
@@ -391,7 +393,7 @@ class PersonalInfo:
         self.resume_path = Entry(self.window, width='20', font=("黑体", 15))
         self.person_name = StringVar()
         self.expected_salary = StringVar()
-        self.expected_postion = StringVar()
+        self.expected_position = StringVar()
         self.control_layout()
         self.window_postion()
         self.resume_conent = None
@@ -403,7 +405,7 @@ class PersonalInfo:
         Label(self.window, text='上传简历:', font=("黑体", 15)).place(x=150, y=200)
         Entry(self.window, textvariable=self.person_name, font=("黑体", 15)).place(x=250, y=80)
         Entry(self.window, textvariable=self.expected_salary, font=("黑体", 15)).place(x=250, y=120)
-        Entry(self.window, textvariable=self.expected_postion, font=("黑体", 15)).place(x=250, y=160)
+        Entry(self.window, textvariable=self.expected_position, font=("黑体", 15)).place(x=250, y=160)
         self.resume_path.grid(row=0, column=1)
         self.resume_path.place(x=250, y=200)
         Button(self.window, text="选择文件", command=self.select_file, font=("黑体", 15)).place(x=460, y=200)
@@ -419,12 +421,14 @@ class PersonalInfo:
 
     # 确认提交个人信息,包括简历
     def submit_info(self):
-        expected_salary = self.expected_salary.get()
-        expected_postion = self.expected_postion.get()
-        person_name = self.person_name.get()
+        wanted_salary = self.expected_salary.get()
+        wanted_position = self.expected_position.get()
+        name = self.person_name.get()
         data = {"request_type": "p_submit_info", "data":
-            {"account": self.account, "name": person_name, "salary": expected_salary,
-             "postion": expected_postion, "resume": self.resume_conent}}
+            {"account": self.account, "name": name, "wanted_salary": wanted_salary,
+             "wanted_position": wanted_position, "resume": self.resume_conent}}
+        print(data)
+        print(json.dumps(data))
         hj_sock.send(json.dumps(data).encode())
         self.confirm_submit()
 
@@ -432,10 +436,10 @@ class PersonalInfo:
     def confirm_submit(self):
         data = hj_sock.recv(1024).decode()
         if data == "submit_info_success":
-            tkinter.messagebox.showinfo(title='Hello Job', message='提交成功')
+            tkinter.messagebox.showinfo(title='信息提交', message='提交成功')
             self.window.destroy()
         if data == "submit_info_failed":
-            tkinter.messagebox.showinfo(title='Hello Job', message='提交失败')
+            tkinter.messagebox.showinfo(title='信息提交', message='提交失败')
 
     # 选择简历文件
     def select_file(self):
@@ -445,8 +449,8 @@ class PersonalInfo:
 
     # 读取选择文件中的内容
     def read_resume(self, file_path):
-        f = open(file_path, "r", encoding="utf-8")
-        self.resume_conent = f.read()
+        f = open(file_path, "rb")
+        self.resume_conent = f.read().decode()
 
     def user_quit(self):
         self.window.destroy()
@@ -488,7 +492,7 @@ class EnterpriseLogin:
         elif not user_pwd:
             tkinter.messagebox.showinfo(title='Hello Job', message='密码不能为空')
         else:
-            data = {"request_type": "e_login_verification", "data": {"username": user_name, "password": user_pwd}}
+            data = {"request_type": "e_login_verification", "data": {"account": user_name, "password": user_pwd}}
             hj_sock.send(json.dumps(data).encode())
             self.check_login()
 
@@ -499,7 +503,7 @@ class EnterpriseLogin:
             tkinter.messagebox.showinfo(title='Hello Job', message='账号不存在')
         elif data == "password_error":
             tkinter.messagebox.showinfo(title='Hello Job', message='密码错误')
-        elif data == "allow_e_login":
+        elif data == "allow_login":
             login_account = self.var_usr_name.get()
             self.window.destroy()
             global eview_tk
@@ -516,8 +520,7 @@ class EnterpriseLogin:
 # 企业操作界面
 class EnterpriseView(Thread):
     ADDR = ('127.0.0.1', 8401)
-    chat_sock = socket()
-    chat_sock.connect(ADDR)
+    chat_sock = socket(AF_INET, SOCK_DGRAM)
 
     def __init__(self, master, account):
         super().__init__()
@@ -571,6 +574,8 @@ class EnterpriseView(Thread):
         self.text_msg = Text(self.window, width=65, height=10, bg='white')
         self.text_msg.place(x=700, y=460)
         self.send_msg = Button(self.window, text="发送", command=self.send_chatmsg, font=("黑体", 15)).place(x=700, y=600)
+        self.send_msg = Button(self.window, text="下载简历", command=self.download_resume, font=("黑体", 15)).place(x=800,
+                                                                                                              y=600)
 
     def window_postion(self):
         alignstr = '%dx%d+%d+%d' % (
@@ -587,13 +592,23 @@ class EnterpriseView(Thread):
     def find_applicant(self):
         postion_name = self.postion.get()
         salary_range = self.salary_range.get()
-        data = {"request_type": "search_position", "data":
-            {"postion_name": postion_name,
-             "salary_range": salary_range}}
+        if salary_range == "20000以上":
+            data = {"request_type": "search_applicant", "data":
+                {"wanted_position": postion_name,
+                 "wanted_salary": 20000 - 999999}}
+        else:
+            data = {"request_type": "search_applicant", "data":
+                {"wanted_position": postion_name,
+                 "wanted_salary": salary_range}}
         hj_sock.send(json.dumps(data).encode())
-        # rec_data = hj_sock.recv(1024 * 1024).decode()
-        self.clear_data()
-        self.insert_result()
+        rec_data = hj_sock.recv(1024 * 1024).decode()
+        print(rec_data)
+        if rec_data == "get_applicant_failed":
+            self.clear_data()
+            tkinter.messagebox.showinfo(title='Hello Job', message='没有找到符合的求职者')
+        elif rec_data == "get_applicant_success":
+            self.clear_data()
+            self.insert_result()
 
     # 在查询工作前先清空之前查询的结果
     def clear_data(self):
@@ -603,11 +618,14 @@ class EnterpriseView(Thread):
 
     # 将返回的结果写入列表
     def insert_result(self):
-        for i in range(20):
-            li = ["张三%s"%i, "123465789@qq.com", "总经理", 20000]
-            self.data_tree.insert('', 'end', values=li)
+        rec_data = hj_sock.recv(1024 * 1024).decode()
+        result = json.loads(rec_data)
+        print(result)
+        for i in result["data"]:
+            list = [i['name'], i['account'], i['wanted_position'], i['wanted_salary']]
+            self.data_tree.insert('', 'end', values=list)
 
-    # 双击HR聊天,调取聊天室,如果切换了聊天对象，则清空收消息框的内容。提示与谁聊天中
+    # 双击求职者聊天,调取聊天室,如果切换了聊天对象，则清空收消息框的内容。提示与谁聊天中
     def treeviewClick(self, event):
         for item in self.data_tree.selection():
             self.choose_info = self.data_tree.item(item, "values")
@@ -621,17 +639,31 @@ class EnterpriseView(Thread):
             self.text_msglist.delete('0.0', END)
             self.chat_info = self.choose_info
 
+    # 下载简历
+    def download_resume(self):
+        data = {"request_type": "download_resume", "data":
+            {"account": self.choose_info[1]}}
+        hj_sock.send(json.dumps(data).encode())
+        save_path = tkinter.filedialog.asksaveasfilename(title='保存文件')
+        print(save_path)
+        rec_data = hj_sock.recv(1024 * 1024).decode()
+        if rec_data == "no_resume":
+            tkinter.messagebox.showinfo(title='Error', message='改求职者没有上传简历')
+        else:
+            with open(save_path, "wb") as f:
+                f.write(rec_data.encode())
+
     # 发送聊天信息，不能发送空内容，发送From,To,时间,内容到服务器
     def send_chatmsg(self):
         if self.text_msg.get("0.0", END) == "\n":
             tkinter.messagebox.showinfo(title='Error', message='不能发送空内容')
         else:
             c_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n'
-            data = {"request_type": "p_send_msg", "data":
+            data = {"request_type": "send_msg", "data":
                 {"From": self.account, "To": self.chat_info[1], "send_time": c_time,
                  "send_content": self.text_msg.get("0.0", END)}}
-            # self.chat_sock.send(json.dumps(data).encode())
-            # print(data)
+            self.chat_sock.sendto(json.dumps(data).encode(), ADDR)
+            print(data)
             self.deal_send(c_time)
 
     # 处理发送聊天框，发送完内容，发送框内清空,把自己发的消息打印到收消息框
@@ -644,6 +676,8 @@ class EnterpriseView(Thread):
         self.text_msg.delete('0.0', END)
 
     def run(self):
+        data = {'request_type': "login_chat", "account": self.account}
+        self.chat_sock.sendto(json.dumps(data).encode(), ADDR)
         Receive(self.text_msglist, self.chat_sock)
 
     def user_quit(self):
@@ -654,6 +688,7 @@ class EnterpriseView(Thread):
 
 # 添加职位
 class AddPosition:
+
     def __init__(self, master, account):
         self.account = account
         self.window = Toplevel(master)
@@ -700,7 +735,7 @@ class AddPosition:
         if data == "add_position_success":
             tkinter.messagebox.showinfo(title='Hello Job', message='发布职位成功')
             self.window.destroy()
-        if data == "add_position_failed":
+        elif data == "add_position_failed":
             tkinter.messagebox.showinfo(title='Hello Job', message='发布职位失败')
 
     def user_quit(self):
@@ -709,10 +744,12 @@ class AddPosition:
 
 # 收取聊天信息
 class Receive():
+
     def __init__(self, text_msglist, chat_sock):
+
         while True:
             try:
-                data = chat_sock.recv(1024 * 1024).decode()
+                data = chat_sock.recvfrom(1024*1024).decode()
                 rec_data = json.loads(data)
                 record_from = "%s %s\n" % (rec_data["from"], rec_data["send_time"])
                 text_msglist.tag_config("green", foreground='green')
