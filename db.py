@@ -42,7 +42,7 @@ class Database:
         self.cur.execute(sql,[account,email])
         result = self.cur.fetchall()
         return result
-
+    #添加求职者
     def insertapplicant(self,account,password,mail_addr):
         sql = 'insert into applicant(account,password,mail_addr)' \
               ' values(%s,%s,%s);'
@@ -67,23 +67,24 @@ class Database:
         self.cur.execute(sql,[id])
         result = self.cur.fetchall()
         return result
-
+    #查询所有求职者
     def selallapps(self):
         sql = 'select account from applicant;'
         self.cur.execute(sql)
         return self.cur.fetchall()
 
+    # 查询所有hr
     def selectallhrs(self):
         sql = 'select hr_account from hr;'
         self.cur.execute(sql)
         return self.cur.fetchall()
 
     # 将离线消息添加到消息记录表
-    def insertchatrecord(self,from_account,to_account,content,isofflinemsg):
+    def insertchatrecord(self,from_account,to_account,content,isofflinemsg,send_time):
         sql = 'insert into chat_record(from_account,to_account,' \
-              'content,isofflinemsg) values(%s,%s,%s,%s);'
+              'content,isofflinemsg,send_time) values(%s,%s,%s,%s,%s);'
         try:
-            num = self.cur.execute(sql,[from_account,to_account,content,isofflinemsg])
+            num = self.cur.execute(sql,[from_account,to_account,content,isofflinemsg,send_time])
             self.db.commit()
             return num
         except Exception as e:
@@ -92,7 +93,7 @@ class Database:
 
     #查询消息记录
     def selectchatrecord(self,from_account,to_account):
-        sql = 'select content,from_account,to_account,isofflinemsg from ' \
+        sql = 'select content,from_account,to_account,isofflinemsg,send_time from ' \
               'chat_record where (from_account = %s and to_account = %s) ' \
               'or (from_account = %s and to_account = %s) and send_time < now();'
         try:
